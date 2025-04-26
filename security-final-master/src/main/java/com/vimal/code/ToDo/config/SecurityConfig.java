@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ Apply proper CORS settings
                 .authorizeHttpRequests(authorize -> authorize
                         // Public Endpoints (No Authentication Needed)
-                        .requestMatchers("/auth/login", "/auth/create","/error").permitAll()
+                        .requestMatchers("/auth/login", "/auth/create","/error","/api/geo/search").permitAll()
 
                         // ✅ Role-Based Protected Endpoints
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")  // Admin Only
@@ -55,6 +55,9 @@ public class SecurityConfig {
 
                         .requestMatchers("/reclamation/**").hasAuthority("ROLE_CITOYEN")  // Citoyen Only
                         .requestMatchers("/Events/**").hasAuthority("ROLE_CITOYEN")  // Agent Only
+                        .requestMatchers("/api/geo/search").hasAuthority("ROLE_CITOYEN")  // Agent Only
+
+
 
 
                         .requestMatchers("/user/admin/**").hasAuthority("ROLE_ADMIN")  // Admin Only

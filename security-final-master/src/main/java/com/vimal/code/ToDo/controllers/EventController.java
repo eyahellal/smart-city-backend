@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static org.springframework.http.ResponseEntity.*;
 
 @RestController
@@ -66,7 +69,15 @@ public class EventController {
             return ResponseEntity.internalServerError().build();
         }
     }
+    @GetMapping("/getAll")
+    public ResponseEntity<List<EventRespDto>> getAllEvents(){
+        List<Event>events= eventService.getAllevents();
+        List<EventRespDto> response = events.stream()
+                .map(eventMapper::toDto)
+                .collect(Collectors.toList());
 
+        return ResponseEntity.ok(response);
+    }
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteEvent(@PathVariable long id) {
         eventService.deleteEvent(id);
