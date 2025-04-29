@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,6 +18,7 @@ public class EventRespDto {
     private double longitude;
     private String lieuName;
     private Date date;
+    private Long id;
 
 
 }

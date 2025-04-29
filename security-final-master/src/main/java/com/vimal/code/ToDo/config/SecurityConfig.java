@@ -56,6 +56,8 @@ public class SecurityConfig {
                         .requestMatchers("/reclamation/**").hasAuthority("ROLE_CITOYEN")  // Citoyen Only
                         .requestMatchers("/Events/**").hasAuthority("ROLE_CITOYEN")  // Agent Only
                         .requestMatchers("/api/geo/search").hasAuthority("ROLE_CITOYEN")  // Agent Only
+                        .requestMatchers("/user/update-citoyen/**").hasAuthority("ROLE_CITOYEN")  // Agent Only
+
 
 
 

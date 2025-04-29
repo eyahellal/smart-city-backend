@@ -28,6 +28,7 @@ public class EventMapper {
         dto.setLatitude(event.getLatitude());
         dto.setLongitude(event.getLongitude());
         dto.setDate(event.getDate());
+        dto.setId(event.getId());
 
         return dto;
     }

@@ -62,6 +62,19 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+    @PutMapping("/update-citoyen/{id}")
+    @PreAuthorize("hasRole('ROLE_CITOYEN') or hasRole('ROLE_ADMIN')") // Only Citoyen himself or Admin can update
+    public ResponseEntity<?> updateCitoyen(@PathVariable Long id, @RequestBody UserRequestDto userRequestDto) {
+        try {
+            UserResponseDto updatedUser = userService.updateCitoyen(id, userRequestDto);
+            return ResponseEntity.ok(updatedUser);
+        } catch (Exception e) {
+            logger.error("Error updating Citoyen with ID {}: {}", id, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors de la mise à jour du citoyen: " + e.getMessage());
+        }
+    }
+
 
 
 

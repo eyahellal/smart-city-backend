@@ -1,9 +1,13 @@
 package com.vimal.code.ToDo.models;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -13,6 +17,7 @@ public class Citoyen extends UserEnitiy {
 
     private String state;
     private String city;
+    
 
 
 }

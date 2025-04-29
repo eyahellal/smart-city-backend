@@ -11,6 +11,7 @@ import com.vimal.code.ToDo.exp.UserAlreadyExistsException;
 import com.vimal.code.ToDo.models.Citoyen;
 import com.vimal.code.ToDo.Repositories.UserRepo;
 import com.vimal.code.ToDo.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -100,4 +101,23 @@ public class UserImp implements UserService {
         return citoyen.orElse(null); // Returns null if not found (or throw an exception
     }
 
-}
+    @Override
+    public UserResponseDto updateCitoyen(long id, UserRequestDto userRequestDto) {
+        Citoyen user = citoyenRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + id));
+
+        user.setName(userRequestDto.getName());
+        user.setEmail(userRequestDto.getEmail());
+        user.setState(userRequestDto.getState());
+        user.setCity(userRequestDto.getCity());
+        // Add other fields if necessary (phone number, address, etc.)
+
+        Citoyen updatedUser = citoyenRepo.save(user);
+
+        // 🛠 Manually create a ResponseDto (no mapper needed)
+        return this.userEntityToUserRespDto(user);
+
+
+    }
+
+    }
