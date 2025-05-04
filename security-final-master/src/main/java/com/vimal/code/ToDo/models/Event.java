@@ -22,10 +22,11 @@ public class Event {
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
     private String lieuName;
-
     private double latitude;
-
     private double longitude;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private UserEnitiy createdBy;
     @ManyToMany
     @JoinTable(
             name = "event_participants",
@@ -34,6 +35,9 @@ public class Event {
     )
     private List<Citoyen> participants;
     private String description;
+    @Column(nullable = true, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean validated;
+
 
 
 

@@ -27,6 +27,7 @@ public class EventMapper {
         dto.setDescription(event.getDescription());
         dto.setLatitude(event.getLatitude());
         dto.setLongitude(event.getLongitude());
+        dto.setLieuName(event.getLieuName());
         dto.setDate(event.getDate());
         dto.setId(event.getId());
 

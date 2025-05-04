@@ -87,7 +87,7 @@ public class ReclamationService {
         Reclamation reclamation = reclamationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Réclamation non trouvée"));
 
-        reclamation.setResolu(true);
+        reclamation.setResolu(!reclamation.isResolu());
         return reclamationRepository.save(reclamation);
     }
 

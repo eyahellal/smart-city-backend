@@ -1,5 +1,7 @@
 package com.vimal.code.ToDo.controllers;
 
+import com.vimal.code.ToDo.service.GeoService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +19,8 @@ import java.nio.charset.StandardCharsets;
 @RestController
 @RequestMapping("/api/geo")
 public class GeoController {
+    @Autowired
+    private GeoService geoService;
 
     @GetMapping("/search")
     public ResponseEntity<String> searchLocation(@RequestParam String query) {
@@ -37,5 +41,13 @@ public class GeoController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
     }
+
+
+    @GetMapping("/reverse")
+    public ResponseEntity<String> reverseGeocode(@RequestParam double lat, @RequestParam double lon) {
+        String result = geoService.reverseGeocode(lat, lon);
+        return ResponseEntity.ok(result);
+    }
+
 }
 

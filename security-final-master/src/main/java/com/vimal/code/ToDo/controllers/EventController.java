@@ -1,5 +1,6 @@
 package com.vimal.code.ToDo.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vimal.code.ToDo.dto.req.EventreqDto;
 import com.vimal.code.ToDo.dto.resp.EventRespDto;
 import com.vimal.code.ToDo.models.Event;
@@ -7,17 +8,16 @@ import com.vimal.code.ToDo.service.EventMapper;
 import com.vimal.code.ToDo.service.EventService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static org.springframework.http.ResponseEntity.*;
 
 @RestController
 @RequestMapping("/events")
@@ -29,14 +29,21 @@ public class EventController {
     private static final Logger logger = LoggerFactory.getLogger(EventController.class);
 
     @PostMapping("/create")
-    public ResponseEntity<?> createEvent(@RequestBody EventreqDto dto) {
+    public ResponseEntity<?> createEvent(@RequestBody EventreqDto dto, Authentication authentication) {
         try {
-            Event event = eventService.createEvent(dto);
+            Event event = eventService.createEvent(dto, authentication);
             EventRespDto response = eventMapper.toDto(event);
-            return status(HttpStatus.CREATED).body(response);
+            logger.info("Event created successfully: {}", response);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (JsonProcessingException e) {
+            logger.error("Error during reverse geocoding: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors de la géolocalisation: " + e.getMessage());
+
         } catch (Exception e) {
-            return status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Erreur lors de la création de l'événement : " + e.getMessage());
+            logger.error("Error creating event: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors de la création de l'événement: " + e.getMessage());
         }
     }
 
@@ -45,43 +52,62 @@ public class EventController {
         try {
             Event updated = eventService.updateEvent(id, dto);
             EventRespDto response = eventMapper.toDto(updated);
+            logger.info("Event updated successfully: ID {}", id);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
+            logger.warn("Event not found for update: ID {}", id);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Error updating event with ID {}: {}", id, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors de la mise à jour de l'événement: " + e.getMessage());
         }
     }
 
     @GetMapping("/get/{id}")
     public ResponseEntity<EventRespDto> getEventById(@PathVariable long id) {
         logger.info("Fetching event with ID: {}", id);
+        return eventService.getEventById(id)
+                .map(event -> {
+                    EventRespDto response = eventMapper.toDto(event);
+                    logger.info("Event found: {}", response);
+                    return ResponseEntity.ok(response);
+                })
+                .orElseGet(() -> {
+                    logger.warn("Event not found for ID: {}", id);
+                    return ResponseEntity.notFound().build();
+                });
+    }
+
+    @GetMapping("/getAll")
+    public ResponseEntity<List<EventRespDto>> getAllEvents(Authentication authentication) {
         try {
-            return eventService.getEventById(id)
-                    .map(event -> {
-                        logger.info("Event found: {}", event);
-                        return ResponseEntity.ok(event);
-                    })
-                    .orElseGet(() -> {
-                        logger.warn("Event not found for ID: {}", id);
-                        return ResponseEntity.notFound().build();
-                    });
+            List<Event> events = eventService.getAllEvents(authentication);
+            List<EventRespDto> response = events.stream()
+                    .map(eventMapper::toDto)
+                    .collect(Collectors.toList());
+            logger.info("Fetched {} events", response.size());
+            return ResponseEntity.ok(response);
+        } catch (EntityNotFoundException e) {
+            logger.error("User not found: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (Exception e) {
-            logger.error("Error fetching event with ID: {}", id, e);
-            return ResponseEntity.internalServerError().build();
+            logger.error("Error fetching all events: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
-    @GetMapping("/getAll")
-    public ResponseEntity<List<EventRespDto>> getAllEvents(){
-        List<Event>events= eventService.getAllevents();
-        List<EventRespDto> response = events.stream()
-                .map(eventMapper::toDto)
-                .collect(Collectors.toList());
 
-        return ResponseEntity.ok(response);
-    }
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteEvent(@PathVariable long id) {
-        eventService.deleteEvent(id);
-        return ok("Événement supprimé avec succès.");
+        try {
+            eventService.deleteEvent(id);
+            logger.info("Event deleted successfully: ID {}", id);
+            return ResponseEntity.ok("Événement supprimé avec succès.");
+        } catch (Exception e) {
+            logger.error("Error deleting event with ID {}: {}", id, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors de la suppression de l'événement: " + e.getMessage());
+        }
     }
 
     @PutMapping("/participer/{id}")
@@ -89,9 +115,32 @@ public class EventController {
         try {
             Event event = eventService.inscriptionEvent(id, authentication);
             EventRespDto response = eventMapper.toDto(event);
-            return ok(response);
-        } catch (EntityNotFoundException ex) {
-            return status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+            logger.info("User successfully participated in event: ID {}", id);
+            return ResponseEntity.ok(response);
+        } catch (EntityNotFoundException e) {
+            logger.warn("Error during participation: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Error during participation in event ID {}: {}", id, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors de l'inscription à l'événement: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/validate/{id}")
+    public ResponseEntity<?> validateEvent(@PathVariable long id) {
+        try {
+            Event event = eventService.validateEvent(id);
+            EventRespDto response = eventMapper.toDto(event);
+            logger.info("Event validated successfully: ID {}", id);
+            return ResponseEntity.ok(response);
+        } catch (IllegalStateException e) {
+            logger.warn("Event already validated: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Error validating event with ID {}: {}", id, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors de la validation de l'événement: " + e.getMessage());
         }
     }
 }
