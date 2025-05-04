@@ -19,6 +19,7 @@ public class EventRespDto {
     private String lieuName;
     private Date date;
     private Long id;
+    private  boolean validated;
 
 
 }

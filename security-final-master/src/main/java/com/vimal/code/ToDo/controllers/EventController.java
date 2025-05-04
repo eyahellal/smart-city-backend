@@ -143,4 +143,24 @@ public class EventController {
                     .body("Erreur lors de la validation de l'événement: " + e.getMessage());
         }
     }
+    @GetMapping("/my-events")
+    public ResponseEntity<List<EventRespDto>> getMyEvents(Authentication authentication) {
+        try {
+            List<Event> events = eventService.getEventsByUser(authentication);
+            List<EventRespDto> response = events.stream()
+                    .map(eventMapper::toDto)
+                    .collect(Collectors.toList());
+            logger.info("Fetched {} events for authenticated user", response.size());
+            return ResponseEntity.ok(response);
+        } catch (EntityNotFoundException e) {
+            logger.warn("User not found: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Invalid authentication: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            logger.error("Error fetching events for authenticated user: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 }

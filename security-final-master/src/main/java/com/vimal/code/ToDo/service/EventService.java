@@ -131,4 +131,15 @@ public class EventService {
         event.setValidated(true);
         return eventRepository.save(event);
     }
+    public List<Event> getEventsByUser(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            throw new IllegalArgumentException("Authentication or user email cannot be null");
+        }
+
+        String email = authentication.getName();
+        UserEnitiy user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé pour l'email: " + email));
+
+        return eventRepository.findByCreatedBy(user);
+    }
 }
