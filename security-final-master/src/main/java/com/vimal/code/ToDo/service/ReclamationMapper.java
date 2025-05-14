@@ -31,11 +31,13 @@ public class ReclamationMapper {
     /**
      * Convert Request DTO to Reclamation Entity
      */
-    public Reclamation toEntity(RequestReclamationDto dto/* ,Citoyen citoyen*/) throws IOException {
+    public Reclamation toEntity(RequestReclamationDto dto) throws IOException {
         Reclamation reclamation = new Reclamation();
         reclamation.setResolu(false);
         reclamation.setDescription(dto.getDescription());
         reclamation.setDateCreation(new Date());
+        reclamation.setLongitude(dto.getLongitude());
+        reclamation.setLatitude(dto.getLatitude());
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             String email = authentication.getName();
@@ -87,6 +89,8 @@ public class ReclamationMapper {
         dto.setImage(reclamation.getImage());
         dto.setDescription(reclamation.getDescription());
         dto.setDateCreation(reclamation.getDateCreation());
+        dto.setLongitude(reclamation.getLongitude());
+        dto.setLatitude(reclamation.getLatitude());
 
 
         // Extract details from entity

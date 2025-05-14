@@ -22,6 +22,8 @@ public class Reclamation {
     private boolean resolu;
     private String image;
     private String description;
+    private double longitude;
+    private double latitude;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateCreation;

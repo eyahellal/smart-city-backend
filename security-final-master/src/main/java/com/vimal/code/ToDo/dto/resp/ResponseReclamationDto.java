@@ -14,6 +14,8 @@ public class ResponseReclamationDto {
     private Date dateCreation;
     private String serviceUrbainType;
     private String citoyenName;
+    private double longitude;
+    private double latitude;
 
     }
 //    private String serviceUrbainType;

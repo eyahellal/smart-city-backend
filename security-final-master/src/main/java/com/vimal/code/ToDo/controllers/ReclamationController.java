@@ -2,11 +2,9 @@ package com.vimal.code.ToDo.controllers;
 
 import com.vimal.code.ToDo.dto.req.RequestReclamationDto;
 import com.vimal.code.ToDo.dto.resp.ResponseReclamationDto;
-import com.vimal.code.ToDo.models.Agent;
-import com.vimal.code.ToDo.models.Reclamation;
-import com.vimal.code.ToDo.models.ServiceType;
-import com.vimal.code.ToDo.models.ServiceUrbain;
+import com.vimal.code.ToDo.models.*;
 import com.vimal.code.ToDo.service.AgentService;
+import com.vimal.code.ToDo.service.NotificationService;
 import com.vimal.code.ToDo.service.ReclamationService;
 import com.vimal.code.ToDo.service.ReclamationMapper;
 import jakarta.persistence.EntityNotFoundException;
@@ -31,33 +29,13 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/reclamations")
-//@PreAuthorize("hasRole('ROLE_CITOYEN')")
-
-
 @RequiredArgsConstructor
 public class ReclamationController {
     private final ReclamationService reclamationService;
     private final AgentService agentService;
     private final ReclamationMapper reclamationMapper;
     private static final Logger logger = LoggerFactory.getLogger(ReclamationController.class);
-
-
-    @PutMapping("/agent/setResolu/{id}")
-    @PreAuthorize("hasAuthority('ROLE_AGENT')")
-    public ResponseEntity<?> setReclamationResolu(@PathVariable Long id) {
-        try {
-            Reclamation updated = reclamationService.setReclamationAsResolved(id);
-            return ResponseEntity.ok("✅ Réclamation marquée comme résolue avec succès.");
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("❌ Réclamation non trouvée.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("❌ Erreur lors de la mise à jour de la réclamation.");
-        }
-    }
-
-
-
+    private final NotificationService notificationService;
 
     @GetMapping("/agent/getAll")
     @PreAuthorize("hasAuthority('ROLE_AGENT')")
@@ -96,14 +74,11 @@ public class ReclamationController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            e.printStackTrace(); // Optional: log for debug
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erreur serveur lors de la récupération des réclamations : " + e.getMessage());
         }
     }
-
-
-
 
     @GetMapping("/getAll/{id}")
     public ResponseEntity<List<ResponseReclamationDto>> getAllReclamationsByCitoyen(@PathVariable Long id) {
@@ -124,27 +99,28 @@ public class ReclamationController {
             @RequestParam(value = "image", required = false) MultipartFile imageFile,
             @RequestParam("description") String description,
             @RequestParam("serviceType") String serviceType,
+            @RequestParam("latitude") double latitude,
+            @RequestParam("longitude") double longitude,
             Authentication authentication) {
 
         try {
-            // Check if serviceType is provided
             if (serviceType == null || serviceType.isEmpty()) {
                 return ResponseEntity.badRequest().body("❌ Service type is required.");
             }
 
-            // Prepare DTO
             RequestReclamationDto requestDto = new RequestReclamationDto();
             requestDto.setImage(imageFile);
             requestDto.setDescription(description);
             requestDto.setServiceType(ServiceType.valueOf(serviceType));
+            requestDto.setLatitude(latitude);
+            requestDto.setLongitude(longitude);
 
-            // Create Reclamation
             Reclamation createdReclamation = reclamationService.createReclamation(requestDto);
             ResponseReclamationDto responseDto = reclamationMapper.toDto(createdReclamation);
 
             logger.info("✅ Reclamation created successfully for user: {}", authentication.getName());
-            System.out.println("📸 Received image: " + imageFile.getOriginalFilename());
-            System.out.println("📏 Image size: " + imageFile.getSize());
+            System.out.println("📸 Received image: " + (imageFile != null ? imageFile.getOriginalFilename() : "none"));
+            System.out.println("📏 Image size: " + (imageFile != null ? imageFile.getSize() : 0));
 
             return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
 
@@ -153,7 +129,7 @@ public class ReclamationController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 
         } catch (IOException e) {
-            e.printStackTrace(); // Show full cause in console
+            e.printStackTrace();
             return ResponseEntity.badRequest().body("Error processing image file: " + e.getMessage());
 
         } catch (Exception e) {
@@ -163,9 +139,6 @@ public class ReclamationController {
         }
     }
 
-    /**
-     * Retrieve an image by reclamation ID
-     */
     @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<byte[]> getImage(@PathVariable Long id) throws IOException {
         Reclamation reclamation = reclamationService.getReclamationById(id);
@@ -184,7 +157,7 @@ public class ReclamationController {
         logger.debug("Successfully retrieved image for reclamation ID: {}", id);
 
         return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG) // Adjust based on image type
+                .contentType(MediaType.IMAGE_JPEG)
                 .body(imageData);
     }
 
@@ -208,10 +181,9 @@ public class ReclamationController {
                     .body("Error updating reclamation: " + e.getMessage());
         }
     }
-    @DeleteMapping("delete/{id}")
-    public ResponseEntity<String> deleteReclamation(
-            @PathVariable Long id)
-     {
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteReclamation(@PathVariable Long id) {
         try {
             reclamationService.deleteReclamation(id);
             logger.info("Successfully deleted reclamation ID: {}", id);
@@ -219,7 +191,34 @@ public class ReclamationController {
         } catch (EntityNotFoundException e) {
             logger.warn("Reclamation not found for ID: {}", id);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
 
-        }}}
+    @PutMapping("/agent/setResolu/{id}")
+    @PreAuthorize("hasAuthority('ROLE_AGENT')")
+    public ResponseEntity<?> setReclamationResolu(@PathVariable Long id) {
+        try {
+            Reclamation reclamation = reclamationService.getReclamationById(id);
+            boolean wasNotResolved = !reclamation.isResolu();
 
+            Reclamation updated = reclamationService.setReclamationAsResolved(id);
 
+            if (wasNotResolved && updated.isResolu()) {
+                Citoyen user = (Citoyen) reclamation.getCitoyen();
+                logger.debug("Attempting to send notification for user: {}", user != null ? user.getEmail() : "null");
+                if (user != null) {
+                    notificationService.createReclamationNotification(id, user.getEmail());
+                } else {
+                    logger.warn("User not found for reclamation ID: {}", id);
+                }
+            }
+
+            return ResponseEntity.ok("✅ Réclamation marquée comme résolue avec succès.");
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("❌ Réclamation non trouvée.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("❌ Erreur lors de la mise à jour de la réclamation.");
+        }
+    }
+}

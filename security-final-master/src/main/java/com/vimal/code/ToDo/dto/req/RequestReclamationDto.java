@@ -16,4 +16,6 @@ public class RequestReclamationDto {
     private MultipartFile image;
     private String description;
     private ServiceType serviceType;
+    private double latitude;
+    private double longitude;
 }

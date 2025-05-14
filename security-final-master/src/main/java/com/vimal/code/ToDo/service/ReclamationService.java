@@ -65,6 +65,8 @@ public class ReclamationService {
             }
             rec.setServiceResponsable(service);
             rec.setDateCreation(new Date());
+            rec.setLatitude(dto.getLatitude());
+            rec.setLongitude(dto.getLongitude());
 
             return reclamationRepository.save(rec);
         }).orElseThrow(() -> new RuntimeException("Réclamation non trouvée !"));

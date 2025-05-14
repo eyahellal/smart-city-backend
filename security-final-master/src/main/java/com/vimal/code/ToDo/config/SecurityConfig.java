@@ -55,6 +55,8 @@ public class SecurityConfig {
                         .requestMatchers("/reclamation/**").hasAuthority("ROLE_CITOYEN")
                         .requestMatchers("/user/update-citoyen/**").hasAuthority("ROLE_CITOYEN")
                         .requestMatchers("/user/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/notifications/**").hasAuthority("ROLE_CITOYEN")
+
                         // Any other request must be authenticated
                         .anyRequest().authenticated()
                 )
