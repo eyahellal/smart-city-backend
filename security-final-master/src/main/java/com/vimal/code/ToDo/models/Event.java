@@ -24,7 +24,7 @@ public class Event {
     private String lieuName;
     private double latitude;
     private double longitude;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "created_by")
     private UserEnitiy createdBy;
     @ManyToMany

@@ -14,9 +14,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -144,6 +146,7 @@ public class EventController {
         }
     }
     @GetMapping("/my-events")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<EventRespDto>> getMyEvents(Authentication authentication) {
         try {
             List<Event> events = eventService.getEventsByUser(authentication);
@@ -163,4 +166,26 @@ public class EventController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
-}
+    @GetMapping("/event-count/{eventId}")
+    public ResponseEntity<String> getParticipantCount(@PathVariable Long eventId, Authentication authentication) {
+        try {
+            Optional<Event> eventOpt = eventService.getEventById(eventId);
+            if (eventOpt.isEmpty()) {
+                logger.warn("Event not found with ID: {}", eventId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Événement introuvable avec l'ID: " + eventId);
+            }
+
+            Event event = eventOpt.get();
+
+            int participantCount = eventService.getParticipantCount(event);
+            logger.info("Participant count for event {}: {}", eventId, participantCount);
+
+            return ResponseEntity.ok(String.valueOf(participantCount));
+        } catch (Exception e) {
+            logger.error("Error fetching participant count for event {}: {}", eventId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors de la récupération du nombre de participants: " + e.getMessage());
+        }
+    }}
+

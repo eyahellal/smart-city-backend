@@ -12,7 +12,9 @@ import com.vimal.code.ToDo.models.Citoyen;
 import com.vimal.code.ToDo.models.Event;
 import com.vimal.code.ToDo.models.Role;
 import com.vimal.code.ToDo.models.UserEnitiy;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceContext;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -37,6 +39,9 @@ public class EventService {
     private GeoService geoService;
     @Autowired
     private UserRepo userRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
 
     public Event createEvent(EventreqDto dto, Authentication authentication) throws JsonProcessingException {
@@ -141,5 +146,14 @@ public class EventService {
                 .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé pour l'email: " + email));
 
         return eventRepository.findByCreatedBy(user);
+    }
+    @Transactional(readOnly = true)
+    public int getParticipantCount(Event event) {
+        Long count = entityManager.createQuery(
+                        "SELECT COUNT(c) FROM Event e JOIN e.participants c WHERE e.id = :eventId",
+                        Long.class)
+                .setParameter("eventId", event.getId())
+                .getSingleResult();
+        return count.intValue();
     }
 }

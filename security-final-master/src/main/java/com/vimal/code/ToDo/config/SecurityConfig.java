@@ -52,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/agent/**").hasAuthority("ROLE_AGENT")
                         .requestMatchers("/citoyen/**", "/api/images/**").hasAuthority("ROLE_CITOYEN")
                         .requestMatchers("/reclamations/agent/getAll").hasAuthority("ROLE_AGENT")
+                        .requestMatchers("/agent-stats/**").hasAuthority("ROLE_AGENT")
                         .requestMatchers("/reclamation/**").hasAuthority("ROLE_CITOYEN")
                         .requestMatchers("/user/update-citoyen/**").hasAuthority("ROLE_CITOYEN")
                         .requestMatchers("/user/admin/**").hasAuthority("ROLE_ADMIN")
