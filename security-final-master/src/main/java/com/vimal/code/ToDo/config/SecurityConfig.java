@@ -48,6 +48,7 @@ public class SecurityConfig {
                         // Role-Based Protected Endpoints
                         .requestMatchers("/events/create", "/events/update/**", "/events/delete/**", "/events/participer/**").hasAnyAuthority("ROLE_CITOYEN", "ROLE_AGENT", "ROLE_ADMIN")
                         .requestMatchers("/events/validate/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/admin-stats").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/agent/**").hasAuthority("ROLE_AGENT")
                         .requestMatchers("/citoyen/**", "/api/images/**").hasAuthority("ROLE_CITOYEN")
