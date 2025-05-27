@@ -1,5 +1,6 @@
 package com.vimal.code.ToDo.dto.req;
 
+import com.vimal.code.ToDo.models.Role;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +13,7 @@ public class UserRequestDto {
         private String password;
         private String state;
         private String city;
+        private Role role;
 
 
 }

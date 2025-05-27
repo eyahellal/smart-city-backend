@@ -1,5 +1,6 @@
 package com.vimal.code.ToDo.service;
 
+import com.vimal.code.ToDo.dto.req.AgentRequestDto;
 import com.vimal.code.ToDo.dto.req.UserRequestDto;
 import com.vimal.code.ToDo.dto.resp.UserResponseDto;
 import com.vimal.code.ToDo.models.Citoyen;
@@ -12,6 +13,8 @@ public interface UserService extends UserDetailsService {
     List<UserResponseDto> getAllUser();
 
     public UserResponseDto createUser(UserRequestDto userRequestDto);
+    public UserResponseDto createAgent(AgentRequestDto userRequestDto);
+
 
     public UserEnitiy findByEmail(String email);
 

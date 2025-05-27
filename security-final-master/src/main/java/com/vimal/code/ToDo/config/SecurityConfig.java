@@ -43,16 +43,20 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ Apply proper CORS settings
                 .authorizeHttpRequests(authorize -> authorize
                         // Public Endpoints (No Authentication Needed)
-                        .requestMatchers("/auth/login", "/auth/create", "/error", "/api/geo/**", "/api/citoyen/chat", "/events/getAll").permitAll()
+                        .requestMatchers("/auth/login", "/auth/create", "/error", "/api/geo/**", "/api/citoyen/chat", "/events/getAll","reclamations/**").permitAll()
 
                         // Role-Based Protected Endpoints
                         .requestMatchers("/events/create", "/events/update/**", "/events/delete/**", "/events/participer/**").hasAnyAuthority("ROLE_CITOYEN", "ROLE_AGENT", "ROLE_ADMIN")
                         .requestMatchers("/events/validate/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/admin-stats").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/auth/create-agent").hasAuthority("ROLE_ADMIN")
+
                         .requestMatchers("/agent/**").hasAuthority("ROLE_AGENT")
                         .requestMatchers("/citoyen/**", "/api/images/**").hasAuthority("ROLE_CITOYEN")
                         .requestMatchers("/reclamations/agent/getAll").hasAuthority("ROLE_AGENT")
+                        .requestMatchers("/reclamations/classify").hasAuthority("ROLE_AGENT")
+
                         .requestMatchers("/agent-stats/**").hasAuthority("ROLE_AGENT")
                         .requestMatchers("/reclamation/**").hasAuthority("ROLE_CITOYEN")
                         .requestMatchers("/user/update-citoyen/**").hasAuthority("ROLE_CITOYEN")

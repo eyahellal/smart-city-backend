@@ -2,13 +2,13 @@ package com.vimal.code.ToDo.service.imp;
 
 import com.vimal.code.ToDo.Repositories.CitoyenRepository;
 import com.vimal.code.ToDo.Repositories.EventRepository;
+import com.vimal.code.ToDo.Repositories.ServiceUrbainRepository;
 import com.vimal.code.ToDo.config.AuthConfig;
+import com.vimal.code.ToDo.dto.req.AgentRequestDto;
 import com.vimal.code.ToDo.dto.req.UserRequestDto;
 import com.vimal.code.ToDo.dto.resp.UserResponseDto;
-import com.vimal.code.ToDo.models.UserEnitiy;
-import com.vimal.code.ToDo.models.Role; // Import the Role enum
+import com.vimal.code.ToDo.models.*;
 import com.vimal.code.ToDo.exp.UserAlreadyExistsException;
-import com.vimal.code.ToDo.models.Citoyen;
 import com.vimal.code.ToDo.Repositories.UserRepo;
 import com.vimal.code.ToDo.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
@@ -31,7 +31,8 @@ public class UserImp implements UserService {
     @Autowired
     private CitoyenRepository citoyenRepo;
 
-
+    @Autowired
+    private ServiceUrbainRepository serviceUrbainRepository;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -99,6 +100,32 @@ public class UserImp implements UserService {
     public UserEnitiy findByEmail(String email) {
         Optional<UserEnitiy> citoyen = userRepo.findByEmail(email);
         return citoyen.orElse(null); // Returns null if not found (or throw an exception
+    }
+    public UserResponseDto createAgent(AgentRequestDto agentRequestDto) {
+        Optional<UserEnitiy> foundUser = this.userRepo.findByEmail(agentRequestDto.getEmail());
+
+        if (foundUser.isEmpty()) {
+            // Create an Agent entity
+            Agent agent = new Agent();
+            agent.setName(agentRequestDto.getName());
+            agent.setEmail(agentRequestDto.getEmail());
+            agent.setPassword(authConfig.passwordEncoder().encode(agentRequestDto.getPassword()));
+
+            // Assign role to Agent
+            agent.setRole(Role.AGENT);
+
+            ServiceUrbain service = serviceUrbainRepository.findByType(agentRequestDto.getServiceType());
+            if (service == null) {
+                throw new EntityNotFoundException("ServiceUrbain not found for type: " + agentRequestDto.getServiceType());
+            }            agent.setServiceUrbain(service);
+
+            // Save the Agent entity (assuming userRepo can save Agent entities)
+            UserEnitiy createdAgent = userRepo.save(agent);
+
+            return this.userEntityToUserRespDto(createdAgent);
+        } else {
+            throw new UserAlreadyExistsException("Agent with email " + agentRequestDto.getEmail() + " already exists");
+        }
     }
 
     @Override

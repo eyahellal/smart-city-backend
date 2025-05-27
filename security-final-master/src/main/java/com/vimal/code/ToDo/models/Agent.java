@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
 
 public class Agent extends UserEnitiy {
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "service_urbain_id") // Nom de la colonne de la clé étrangère
     private ServiceUrbain serviceUrbain; // Each Agent belongs to exactly one ServiceUrbain
 }
