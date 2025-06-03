@@ -27,7 +27,7 @@ public class NotificationService {
         UserEnitiy user = userOptional.orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
         Notification notification = new Notification();
-        notification.setMessage("Your reclamation (ID: " + reclamationId + ") has been resolved.");
+        notification.setMessage("Votre réclamation (ID: " + reclamationId + ") a été résolue.");
         notification.setUser(user);
         // No need to set seen or createdAt; @PrePersist handles them
         notification.setReclamationId(reclamationId);
