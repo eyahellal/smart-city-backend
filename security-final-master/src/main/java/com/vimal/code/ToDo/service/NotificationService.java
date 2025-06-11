@@ -1,6 +1,7 @@
 package com.vimal.code.ToDo.service;
 
 import com.vimal.code.ToDo.models.Notification;
+import com.vimal.code.ToDo.models.Reclamation;
 import com.vimal.code.ToDo.models.UserEnitiy;
 import com.vimal.code.ToDo.Repositories.NotificationRepository;
 import com.vimal.code.ToDo.Repositories.UserRepo;
@@ -18,6 +19,8 @@ public class NotificationService {
     private static final Logger logger = LoggerFactory.getLogger(NotificationService.class); // Add logger
     @Autowired
     private NotificationRepository notificationRepository;
+    @Autowired
+    private  ReclamationService reclamationService;
 
     @Autowired
     private UserRepo userRepository;
@@ -27,7 +30,8 @@ public class NotificationService {
         UserEnitiy user = userOptional.orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
         Notification notification = new Notification();
-        notification.setMessage("Votre réclamation (ID: " + reclamationId + ") a été résolue.");
+        Reclamation reclamation= reclamationService.getReclamationById(reclamationId);
+        notification.setMessage("Votre réclamation (ID: " + reclamation.getDescription() + ") a été résolue.");
         notification.setUser(user);
         // No need to set seen or createdAt; @PrePersist handles them
         notification.setReclamationId(reclamationId);

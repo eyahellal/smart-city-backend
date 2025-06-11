@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ Apply proper CORS settings
                 .authorizeHttpRequests(authorize -> authorize
                         // Public Endpoints (No Authentication Needed)
-                        .requestMatchers("/auth/login", "/auth/create", "/error", "/api/geo/**", "/api/citoyen/chat", "/events/getAll","reclamations/**").permitAll()
+                        .requestMatchers("/auth/login", "/auth/create", "/error", "/api/geo/**", "/api/citoyen/chat", "/events/getAll","reclamations/**", "/events/my-events","/api/generate-pdf/**" ).permitAll()
 
                         // Role-Based Protected Endpoints
                         .requestMatchers("/events/create", "/events/update/**", "/events/delete/**", "/events/participer/**").hasAnyAuthority("ROLE_CITOYEN", "ROLE_AGENT", "ROLE_ADMIN")
@@ -62,7 +62,9 @@ public class SecurityConfig {
                         .requestMatchers("/reclamation/**").hasAuthority("ROLE_CITOYEN")
                         .requestMatchers("/user/update-citoyen/**").hasAuthority("ROLE_CITOYEN")
                         .requestMatchers("/user/admin/**").hasAuthority("ROLE_ADMIN")
+
                         .requestMatchers("/notifications/**").hasAuthority("ROLE_CITOYEN")
+
 
                         // Any other request must be authenticated
                         .anyRequest().authenticated()
