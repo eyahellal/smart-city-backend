@@ -1,15 +1,12 @@
 package com.vimal.code.ToDo.service.imp;
 
-import com.vimal.code.ToDo.Repositories.CitoyenRepository;
-import com.vimal.code.ToDo.Repositories.EventRepository;
-import com.vimal.code.ToDo.Repositories.ServiceUrbainRepository;
+import com.vimal.code.ToDo.Repositories.*;
 import com.vimal.code.ToDo.config.AuthConfig;
 import com.vimal.code.ToDo.dto.req.AgentRequestDto;
 import com.vimal.code.ToDo.dto.req.UserRequestDto;
 import com.vimal.code.ToDo.dto.resp.UserResponseDto;
 import com.vimal.code.ToDo.models.*;
 import com.vimal.code.ToDo.exp.UserAlreadyExistsException;
-import com.vimal.code.ToDo.Repositories.UserRepo;
 import com.vimal.code.ToDo.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
@@ -30,6 +27,8 @@ public class UserImp implements UserService {
 
     @Autowired
     private CitoyenRepository citoyenRepo;
+    @Autowired
+    private AgentRepository agentRepository;
 
     @Autowired
     private ServiceUrbainRepository serviceUrbainRepository;
@@ -145,6 +144,9 @@ public class UserImp implements UserService {
         return this.userEntityToUserRespDto(user);
 
 
+    }
+    public List<Agent> findAllAgents() {
+        return agentRepository.findAll();
     }
 
     }

@@ -1,5 +1,6 @@
 package com.vimal.code.ToDo.service;
 
+import com.vimal.code.ToDo.Repositories.AgentRepository;
 import com.vimal.code.ToDo.dto.resp.AgentStatsDTO;
 import com.vimal.code.ToDo.dto.resp.EventDTO;
 import com.vimal.code.ToDo.dto.resp.ResolutionTrendDTO;
@@ -10,6 +11,7 @@ import com.vimal.code.ToDo.models.ServiceUrbain;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,11 @@ public class AgentStatsService {
     private final ReclamationService reclamationService;
     private final EventService eventService;
     private final AgentService agentService;
+    @Autowired
+    private AgentRepository agentRepository;
+    public List<Object[]> countAgentsByServiceType() {
+        return agentRepository.countAgentsByServiceType();
+    }
 
     public AgentStatsDTO getAgentStats(String agentEmail, Authentication authentication) {
         logger.info("Fetching stats for agent with email: {}", agentEmail);

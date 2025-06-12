@@ -31,7 +31,7 @@ public class NotificationService {
 
         Notification notification = new Notification();
         Reclamation reclamation= reclamationService.getReclamationById(reclamationId);
-        notification.setMessage("Votre réclamation (ID: " + reclamation.getDescription() + ") a été résolue.");
+        notification.setMessage("Votre réclamation  " + reclamation.getDescription() + " a été résolue.");
         notification.setUser(user);
         // No need to set seen or createdAt; @PrePersist handles them
         notification.setReclamationId(reclamationId);

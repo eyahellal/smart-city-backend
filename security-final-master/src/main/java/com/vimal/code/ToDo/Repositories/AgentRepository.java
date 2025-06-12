@@ -23,4 +23,7 @@ public interface AgentRepository extends JpaRepository<Agent, Long> {
 
 
     Optional<Agent> findByEmail(String email);
+    @Query("SELECT a.serviceUrbain.type, COUNT(a) FROM Agent a GROUP BY a.serviceUrbain.type")
+    List<Object[]> countAgentsByServiceType();
+
 }

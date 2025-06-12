@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -61,7 +62,7 @@ public class AgentController {
         try {
             String agentEmail = authentication.getName();
             UserEnitiy agentOpt = userService.findByEmail(agentEmail);
-            if (agentOpt==null) {
+            if (agentOpt == null) {
                 logger.warn("Agent not found for email: {}", agentEmail);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("Agent non trouvé pour l'email : " + agentEmail);
@@ -91,4 +92,47 @@ public class AgentController {
                     .body("Erreur lors de la récupération du nombre de participants: " + e.getMessage());
         }
     }
+
+    @GetMapping("/service-agent-counts")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<List<Object[]>> getServiceAgentCounts() {
+        try {
+            if (agentStatsService == null) {
+                logger.error("agentStatsService is null - injection failed");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .build(); // No body, just status
+            }
+            List<Object[]> counts = agentStatsService.countAgentsByServiceType();
+            if (counts == null || counts.isEmpty()) {
+                logger.warn("No service agent counts found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .build();
+            }
+            logger.info("Fetched service agent counts: {}", counts);
+            return ResponseEntity.ok(counts);
+        } catch (Exception e) {
+            logger.error("Error fetching service agent counts: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .build();
+        }
+    }
+    @GetMapping("/all-agents")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<List<Agent>> getAllAgents() {
+        try {
+            List<Agent> agents = userService.findAllAgents(); // Assuming this method exists
+            if (agents == null || agents.isEmpty()) {
+                logger.warn("No agents found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .build();
+            }
+            logger.info("Fetched all agents: {}", agents);
+            return ResponseEntity.ok(agents);
+        } catch (Exception e) {
+            logger.error("Error fetching all agents: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .build();
+        }
+    }
+
 }
