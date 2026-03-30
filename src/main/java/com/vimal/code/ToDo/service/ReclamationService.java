@@ -48,7 +48,6 @@ public class ReclamationService {
         return reclamationRepository.findById(id).map(rec -> {
             rec.setDescription(dto.getDescription());
 
-            // 💾 Handle new image upload
             if (imageFile != null && !imageFile.isEmpty()) {
                 try {
                     String savedPath = fileStorageService.saveImage(imageFile); // Save image to disk
@@ -58,7 +57,6 @@ public class ReclamationService {
                 }
             }
 
-            // ✅ Update service type
             ServiceUrbain service = serviceUrbainRepository.findByType(dto.getServiceType());
             if (service == null) {
                 throw new EntityNotFoundException("ServiceUrbain not found for type: " + dto.getServiceType());

@@ -65,19 +65,15 @@ public class UserImp implements UserService {
         Optional<UserEnitiy> foundUser = this.userRepo.findByEmail(userRequestDto.getEmail());
 
         if (foundUser.isEmpty()) {
-            // Create a Citoyen instead of a generic UserEnitiy
             Citoyen citoyen = new Citoyen();
             citoyen.setName(userRequestDto.getName());
             citoyen.setEmail(userRequestDto.getEmail());
             citoyen.setPassword(authConfig.passwordEncoder().encode(userRequestDto.getPassword()));
 
-            // Assign default role to Citoyen
             citoyen.setRole(Role.CITOYEN);
 
-            // Set Citoyen-specific attribute
             citoyen.setCity(userRequestDto.getCity());
             citoyen.setState(userRequestDto.getState());
-            // Save the Citoyen entity
             Citoyen createdCitoyen = citoyenRepo.save(citoyen);
 
             return this.userEntityToUserRespDto(createdCitoyen);

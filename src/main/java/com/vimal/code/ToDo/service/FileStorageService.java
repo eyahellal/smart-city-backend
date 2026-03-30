@@ -16,7 +16,6 @@ public class FileStorageService {
     private String uploadDir;
 
     public String saveImage(MultipartFile file) throws IOException {
-        // Create directory if it doesn't exist
         Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);

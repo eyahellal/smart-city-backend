@@ -33,7 +33,6 @@ public class NotificationService {
         Reclamation reclamation= reclamationService.getReclamationById(reclamationId);
         notification.setMessage("Votre réclamation  " + reclamation.getDescription() + " a été résolue.");
         notification.setUser(user);
-        // No need to set seen or createdAt; @PrePersist handles them
         notification.setReclamationId(reclamationId);
 
         notificationRepository.save(notification);
@@ -48,7 +47,7 @@ public class NotificationService {
     public List<Notification> getReclamationNotifications(String userId) {
         UserEnitiy user = userRepository.findByEmail(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
-        logger.info("User found for userId {}: {}", userId,user); // Log the user
+        logger.info("User found for userId {}: {}", userId,user);
         return notificationRepository.findByUserAndReclamationIdNotNullOrderByCreatedAtDesc(user);
     }
 

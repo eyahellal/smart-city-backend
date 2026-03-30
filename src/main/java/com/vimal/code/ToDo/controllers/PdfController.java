@@ -72,10 +72,6 @@ public class PdfController {
                 .setFontSize(12).setMarginBottom(10));
         document.add(new Paragraph("Résolues: " + stats.getOrDefault("resolvedReclamations", 0))
                 .setFontSize(12).setMarginBottom(10));
-        document.add(new Paragraph("Événements Total: " + stats.getOrDefault("totalEvents", 0))
-                .setFontSize(12).setMarginBottom(10));
-        document.add(new Paragraph("Taux de Participation: " + stats.getOrDefault("participationRate", 0) + "%")
-                .setFontSize(12).setMarginBottom(20));
 
         // Close the document
         document.close();

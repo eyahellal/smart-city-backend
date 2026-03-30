@@ -17,8 +17,8 @@ public class GeoService {
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
-                    .header("User-Agent", "SmartCityApp/1.0") // required
-                    .header("Accept-Language", "fr") // Request French language
+                    .header("User-Agent", "SmartCityApp/1.0")
+                    .header("Accept-Language", "fr")
                     .GET()
                     .build();
 

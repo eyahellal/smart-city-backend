@@ -27,12 +27,10 @@ public class JwtHelper {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // Extract **username** from JWT
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
 
-    // Extract **role** from JWT
     public String getRoleFromToken(String token) {
         return getClaimFromToken(token, claims -> claims.get("role", String.class));
     }

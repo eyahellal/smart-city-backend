@@ -53,7 +53,6 @@ public class ChatbotController {
             return ResponseEntity.badRequest().body(errorResponse);
         }
 
-        // Add system prompt for Harmonia smart city app
         String systemPrompt = "ous etes votre assistant virtuel pour l'application Smart City tunisienne .\n" +
                 "Dans cette application, les citoyens peuvent :\n" +
                 "\n" +

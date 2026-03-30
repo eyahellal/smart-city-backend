@@ -67,7 +67,6 @@ public class AuthController {
             String role = extractRoleFromAuthorities(userDetails.getAuthorities());
 
             String token = this.helper.generateToken(userDetails, role);
-            // Load full User entity (to access extra fields)
             Optional<UserEnitiy> optionalUser = userRepository.findByEmail(userRequestDto.getEmail());
 
             String city = null;
@@ -99,7 +98,6 @@ public class AuthController {
         }
     }
 
-    // Login endpoint
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody JwtRequest jwtRequest) {
         this.doAuthenticate(jwtRequest.getEmail(), jwtRequest.getPassword());

@@ -41,12 +41,12 @@ public class ReclamationController {
     public ResponseEntity<?> getReclamationsByAgentService(Authentication authentication) {
         try {
             String agentEmail = authentication.getName();
-            System.out.println("✅ Authenticated agent email: " + agentEmail);
+            System.out.println(" Authenticated agent email: " + agentEmail);
 
             Optional<Agent> agentOpt = agentService.findByEmail(agentEmail);
 
             if (agentOpt.isEmpty()) {
-                System.out.println("❌ Agent not found for email: " + agentEmail);
+                System.out.println(" Agent not found for email: " + agentEmail);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("Agent non trouvé pour l'email : " + agentEmail);
             }
@@ -55,16 +55,16 @@ public class ReclamationController {
             ServiceUrbain service = agent.getServiceUrbain();
 
             if (service == null) {
-                System.out.println("⚠️ Agent found but has no associated service.");
+                System.out.println(" Agent found but has no associated service.");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("L'agent n'est pas associé à un service urbain.");
             }
 
-            System.out.println("📌 Agent is linked to service: " + service.getType());
+            System.out.println(" Agent is linked to service: " + service.getType());
 
             List<Reclamation> reclamations = reclamationService.getReclamationsByService(service.getType());
 
-            System.out.println("📥 Nombre de réclamations récupérées: " + reclamations.size());
+            System.out.println(" Nombre de réclamations récupérées: " + reclamations.size());
 
             List<ResponseReclamationDto> response = reclamations.stream()
                     .map(reclamationMapper::toDto)
@@ -104,7 +104,7 @@ public class ReclamationController {
 
         try {
             if (serviceType == null || serviceType.isEmpty()) {
-                return ResponseEntity.badRequest().body("❌ Service type is required.");
+                return ResponseEntity.badRequest().body(" Service type is required.");
             }
 
             RequestReclamationDto requestDto = new RequestReclamationDto();
@@ -117,14 +117,14 @@ public class ReclamationController {
             Reclamation createdReclamation = reclamationService.createReclamation(requestDto);
             ResponseReclamationDto responseDto = reclamationMapper.toDto(createdReclamation);
 
-            logger.info("✅ Reclamation created successfully for user: {}", authentication.getName());
-            System.out.println("📸 Received image: " + (imageFile != null ? imageFile.getOriginalFilename() : "none"));
-            System.out.println("📏 Image size: " + (imageFile != null ? imageFile.getSize() : 0));
+            logger.info(" Reclamation created successfully for user: {}", authentication.getName());
+            System.out.println(" Received image: " + (imageFile != null ? imageFile.getOriginalFilename() : "none"));
+            System.out.println(" Image size: " + (imageFile != null ? imageFile.getSize() : 0));
 
             return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
 
         } catch (EntityNotFoundException e) {
-            logger.error("❌ Entity not found: {}", e.getMessage());
+            logger.error(" Entity not found: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 
         } catch (IOException e) {

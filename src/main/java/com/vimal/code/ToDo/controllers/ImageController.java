@@ -25,7 +25,6 @@ public class ImageController {
 
             Map<String, String> response = new HashMap<>();
             response.put("filename", filename);
-            // The URL that will be used by the frontend
             response.put("url", "/uploads/" + filename);
 
             return ResponseEntity.ok(response);

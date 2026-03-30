@@ -43,11 +43,13 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ Apply proper CORS settings
                 .authorizeHttpRequests(authorize -> authorize
                         // Public Endpoints (No Authentication Needed)
-                        .requestMatchers("/auth/login", "/auth/create", "/error", "/api/geo/**", "/api/citoyen/chat", "/events/getAll","reclamations/**", "/events/my-events","/api/generate-pdf/**" ).permitAll()
+                        .requestMatchers("/auth/login", "/auth/create", "/error", "/api/geo/**", "/api/citoyen/chat", "/events/getAll","reclamations/**", "/events/my-events","/api/generate-pdf/**", "/agent-stats/**" ).permitAll()
 
                         // Role-Based Protected Endpoints
                         .requestMatchers("/events/create", "/events/update/**", "/events/delete/**", "/events/participer/**", "events/**","/agent-stats/**vfcxc ").hasAnyAuthority("ROLE_CITOYEN", "ROLE_AGENT", "ROLE_ADMIN")
+                        .requestMatchers("/agent-stats/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/events/validate/**").hasAuthority("ROLE_ADMIN")
+
                         .requestMatchers("/events/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/agent-stats/service-agent-counts").hasAuthority("ROLE_ADMIN")
 

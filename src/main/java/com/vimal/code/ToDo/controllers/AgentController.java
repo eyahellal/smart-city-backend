@@ -117,7 +117,6 @@ public class AgentController {
         }
     }
     @GetMapping("/all-agents")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<List<Agent>> getAllAgents() {
         try {
             List<Agent> agents = userService.findAllAgents(); // Assuming this method exists
